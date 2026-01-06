@@ -38,19 +38,19 @@ export const Sidebar = () => {
   };
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200 hidden md:flex flex-col">
+    <aside className="fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-[#e5e5e5] hidden md:flex flex-col">
       {/* Brand */}
-      <div className="flex items-center h-16 px-6 border-b border-gray-100">
-        <div className="flex items-center gap-2 text-indigo-600">
-          <div className="p-2 bg-indigo-600 rounded-lg">
-            <FileText size={20} className="text-white" />
+      <div className="flex items-center h-14 px-4 border-b border-[#e5e5e5]">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-[#0d99ff] rounded flex items-center justify-center">
+            <FileText size={18} className="text-white" strokeWidth={2} />
           </div>
-          <span className="text-lg font-bold tracking-tight text-gray-900">Invoice<span className="text-indigo-600">Builder</span></span>
+          <span className="text-sm font-semibold text-[#0d0d0d]">InvoiceBuilder</span>
         </div>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+      <nav className="flex-1 px-2 py-2 space-y-0.5 overflow-y-auto">
         {links.map((link) => {
           const Icon = link.icon;
           const isActive = pathname === link.href;
@@ -59,27 +59,27 @@ export const Sidebar = () => {
               key={link.href}
               href={link.href}
               className={`
-                flex items-center gap-3 px-3 py-2.5 text-sm font-medium rounded-lg transition-colors
+                group flex items-center gap-3 px-3 h-8 text-[13px] font-medium rounded transition-all
                 ${isActive 
-                  ? 'bg-indigo-50 text-indigo-600' 
-                  : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'}
+                  ? 'bg-[#e5f2ff] text-[#0d99ff]' 
+                  : 'text-[#666] hover:bg-[#f5f5f5] hover:text-[#0d0d0d]'}
               `}
             >
-              <Icon size={18} className={isActive ? 'text-indigo-600' : 'text-gray-400'} />
-              {link.label}
+              <Icon size={16} strokeWidth={2} />
+              <span>{link.label}</span>
             </Link>
           );
         })}
       </nav>
 
       {/* User / Logout */}
-      <div className="p-4 border-t border-gray-100">
+      <div className="p-2 border-t border-[#e5e5e5]">
         <button
           onClick={handleLogout}
-          className="flex items-center w-full gap-3 px-3 py-2.5 text-sm font-medium text-gray-600 rounded-lg hover:bg-red-50 hover:text-red-600 transition-colors"
+          className="flex items-center w-full gap-3 px-3 h-8 text-[13px] font-medium text-[#666] rounded hover:bg-[#fff0f0] hover:text-[#f24822] transition-all"
         >
-          <LogOut size={18} />
-          Sign Out
+          <LogOut size={16} strokeWidth={2} />
+          <span>Sign Out</span>
         </button>
       </div>
     </aside>

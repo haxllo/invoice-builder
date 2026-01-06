@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Plus, X } from 'lucide-react';
 import { useAppDispatch } from '@/lib/store/configureStore';
 import { addToast } from '@/lib/store/pageSlice';
+import { validateFileUpload, validateFileSignature } from '@/lib/shared/utils/securityValidation';
 
 interface UploadImageProps {
   onUpload?: (file?: Blob, filename?: string) => void;
@@ -29,18 +30,30 @@ export const UploadImage: React.FC<UploadImageProps> = ({
     inputRef.current?.click();
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    const maxSizeBytes = maxSizeMB * 1024 * 1024;
-    if (file.size > maxSizeBytes) {
+    try {
+      // Validate file before processing
+      validateFileUpload(file);
+      await validateFileSignature(file);
+      
+      const maxSizeBytes = maxSizeMB * 1024 * 1024;
+      if (file.size > maxSizeBytes) {
+        event.target.value = '';
+        dispatch(addToast({ message: `File too large. Max size is ${maxSizeMB}MB`, severity: 'error' }));
+      } else {
+        const url = URL.createObjectURL(file);
+        setCroppedImageUrl(url);
+        if (onUpload) onUpload(file, file.name);
+      }
+    } catch (error: any) {
       event.target.value = '';
-      dispatch(addToast({ message: `File too large. Max size is ${maxSizeMB}MB`, severity: 'error' }));
-    } else {
-      const url = URL.createObjectURL(file);
-      setCroppedImageUrl(url);
-      if (onUpload) onUpload(file, file.name);
+      dispatch(addToast({ 
+        message: error.message || 'Invalid file. Please upload a valid image.', 
+        severity: 'error' 
+      }));
     }
   };
 

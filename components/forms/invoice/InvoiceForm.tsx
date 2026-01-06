@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useForm } from '@/lib/hooks/useForm';
 import { useBusinessesRetrieve } from '@/lib/hooks/useBusinessesRetrieve';
 import { useClientsRetrieve } from '@/lib/hooks/useClientsRetrieve';
@@ -8,7 +8,8 @@ import { useItemsRetrieve } from '@/lib/hooks/useItemsRetrieve';
 import { useCurrenciesRetrieve } from '@/lib/hooks/useCurrenciesRetrieve';
 import type { Invoice, InvoiceAdd, InvoiceItem } from '@/lib/shared/types/invoice';
 import { InvoiceItemTaxType, InvoiceTaxType } from '@/lib/shared/enums/taxType';
-import { Plus, Trash, Info, CreditCard, Paintbrush, DollarSign } from 'lucide-react';
+import { Plus, Trash, Info, CreditCard, Paintbrush, DollarSign, X } from 'lucide-react';
+import { validateFinancialAmount, validateQuantity, validateTaxRate } from '@/lib/shared/utils/securityValidation';
 
 interface InvoiceFormProps {
   invoice?: Invoice;
@@ -20,6 +21,8 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
   const { clients } = useClientsRetrieve({ immediate: true });
   const { items: savedItems } = useItemsRetrieve({ immediate: true });
   const { currencies } = useCurrenciesRetrieve({ immediate: true });
+  
+  const [validationError, setValidationError] = useState<string>('');
 
   const { form, update, setForm } = useForm<InvoiceAdd>({
     invoiceNumber: invoice?.invoiceNumber ?? '',
@@ -86,9 +89,32 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
   };
 
   const updateItem = (index: number, field: keyof InvoiceItem, value: any) => {
-    const newItems = [...(form.invoiceItems || [])];
-    newItems[index] = { ...newItems[index], [field]: value };
-    update('invoiceItems', newItems);
+    try {
+      setValidationError('');
+      let validatedValue = value;
+      
+      // Apply validation based on field type
+      if (field === 'quantity') {
+        validatedValue = validateQuantity(value, 'Quantity');
+      } else if (field === 'unitPriceCentsSnapshot') {
+        // Value comes in as cents, validate as dollars
+        const dollarAmount = Number(value) / 100;
+        validateFinancialAmount(dollarAmount, 'Unit price');
+        validatedValue = value; // Keep as cents
+      } else if (field === 'taxRate') {
+        validatedValue = validateTaxRate(value, 'Item tax rate');
+      }
+      
+      const newItems = [...(form.invoiceItems || [])];
+      newItems[index] = { ...newItems[index], [field]: validatedValue };
+      update('invoiceItems', newItems);
+    } catch (error: any) {
+      setValidationError(error.message);
+      // Still update to allow user to see what they typed, but show error
+      const newItems = [...(form.invoiceItems || [])];
+      newItems[index] = { ...newItems[index], [field]: value };
+      update('invoiceItems', newItems);
+    }
   };
 
   const removeItem = (index: number) => {
@@ -102,18 +128,35 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
     onChange?.({ invoice: form, isValid });
   }, [form, onChange]);
 
-  const labelClasses = "block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1";
-  const inputClasses = "block w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none transition-all";
+  const labelClasses = "block text-[11px] font-semibold text-[#666] uppercase tracking-wide mb-1.5";
+  const inputClasses = "block w-full px-3 h-8 border border-[#e5e5e5] rounded text-[13px] focus:border-[#0d99ff] outline-none transition-colors";
 
   return (
     <div className="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
       {/* Main Invoice Sheet */}
       <div className="flex-1 bg-white shadow-2xl rounded-sm border border-gray-200 overflow-hidden min-h-[1000px]">
+        {/* Validation Error Alert */}
+        {validationError && (
+          <div className="mx-10 mt-8 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+            <Info size={18} className="text-red-600 mt-0.5 flex-shrink-0" />
+            <div>
+              <p className="text-sm font-semibold text-red-900">Validation Error</p>
+              <p className="text-xs text-red-700 mt-1">{validationError}</p>
+            </div>
+            <button 
+              onClick={() => setValidationError('')}
+              className="ml-auto text-red-400 hover:text-red-600"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+        
         {/* Header */}
         <div className="p-10 border-b border-gray-100 flex justify-between items-start gap-12 bg-gray-50/30">
           <div className="space-y-6 flex-1">
             <div 
-              className="w-24 h-24 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center bg-white"
+              className="w-24 h-24 rounded border-2 border-dashed border-[#e5e5e5] flex items-center justify-center bg-white"
               style={{ borderColor: form.customizationColor }}
             >
               {form.businessLogoSnapshot ? (
@@ -163,7 +206,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
                   <label className={labelClasses}>Date</label>
                   <input
                     type="date"
-                    className="w-full text-right text-sm font-semibold border-none p-0 focus:ring-0"
+                    className="w-full text-right text-[13px] font-semibold border-none p-0 focus:ring-0"
                     value={form.issuedAt?.split('T')[0]}
                     onChange={(e) => update('issuedAt', new Date(e.target.value).toISOString())}
                   />
@@ -172,7 +215,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
                   <label className={labelClasses}>Due Date</label>
                   <input
                     type="date"
-                    className="w-full text-right text-sm font-semibold border-none p-0 focus:ring-0"
+                    className="w-full text-right text-[13px] font-semibold border-none p-0 focus:ring-0"
                     value={form.dueDate?.split('T')[0]}
                     onChange={(e) => update('dueDate', new Date(e.target.value).toISOString())}
                   />
@@ -185,7 +228,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
         {/* Bill To */}
         <div className="p-10">
           <div className="max-w-xs">
-            <label className={`${labelClasses} text-indigo-600`}>Bill To</label>
+            <label className={`${labelClasses} text-[#0d99ff]`}>Bill To</label>
             <select
               className={inputClasses}
               value={form.clientId}
@@ -197,8 +240,8 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
               <option value={0}>Select a client...</option>
               {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
-            <div className="mt-2 text-sm text-gray-500 pl-1">
-              <p className="font-bold text-gray-900">{form.clientNameSnapshot}</p>
+            <div className="mt-2 text-[13px] text-[#666] pl-1">
+              <p className="font-semibold text-[#0d0d0d]">{form.clientNameSnapshot}</p>
             </div>
           </div>
         </div>
@@ -220,7 +263,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
                   <td className="py-5">
                     <div className="space-y-1">
                       <select
-                        className="block border-none p-0 text-[10px] font-bold text-indigo-600 bg-transparent focus:ring-0"
+                        className="block border-none p-0 text-[10px] font-semibold text-[#0d99ff] bg-transparent focus:ring-0"
                         value={item.itemId}
                         onChange={(e) => {
                           const saved = savedItems.find(x => x.id === Number(e.target.value));
@@ -235,7 +278,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
                         {savedItems.map(si => <option key={si.id} value={si.id}>{si.name}</option>)}
                       </select>
                       <input
-                        className="block w-full border-none p-0 text-sm font-semibold text-gray-900 focus:ring-0 bg-transparent"
+                        className="block w-full border-none p-0 text-[13px] font-semibold text-[#0d0d0d] focus:ring-0 bg-transparent"
                         value={item.itemNameSnapshot}
                         onChange={(e) => updateItem(index, 'itemNameSnapshot', e.target.value)}
                         placeholder="Item name..."
@@ -288,7 +331,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
               <label className={labelClasses}>Notes to Client</label>
               <textarea
                 rows={4}
-                className="w-full bg-white border border-gray-200 rounded-xl p-4 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+                className="w-full bg-white border border-[#e5e5e5] rounded p-4 text-[13px] outline-none focus:border-[#0d99ff] transition-colors"
                 placeholder="Thanks for your business!"
                 value={form.customerNotes}
                 onChange={(e) => update('customerNotes', e.target.value)}
@@ -309,7 +352,16 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
                   type="number"
                   className="w-12 text-xs font-bold border-none p-0 focus:ring-0 bg-transparent text-indigo-600"
                   value={form.taxRate}
-                  onChange={(e) => update('taxRate', Number(e.target.value))}
+                  onChange={(e) => {
+                    try {
+                      setValidationError('');
+                      const validated = validateTaxRate(e.target.value, 'Tax rate');
+                      update('taxRate', validated);
+                    } catch (error: any) {
+                      setValidationError(error.message);
+                      update('taxRate', Number(e.target.value));
+                    }
+                  }}
                 />
                 <span className="text-[10px] text-gray-400">%</span>
               </div>
@@ -324,7 +376,16 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
                   type="number"
                   className="w-20 text-right text-xs font-bold border-none p-0 focus:ring-0 bg-transparent text-red-600"
                   value={(form.discountAmountCents || 0) / 100}
-                  onChange={(e) => update('discountAmountCents', Number(e.target.value) * 100)}
+                  onChange={(e) => {
+                    try {
+                      setValidationError('');
+                      const validated = validateFinancialAmount(e.target.value, 'Discount');
+                      update('discountAmountCents', validated * 100);
+                    } catch (error: any) {
+                      setValidationError(error.message);
+                      update('discountAmountCents', Number(e.target.value) * 100);
+                    }
+                  }}
                 />
               </div>
             </div>
@@ -341,10 +402,10 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
 
       {/* Sidebar Controls */}
       <div className="w-full lg:w-80 space-y-6">
-        <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm space-y-6 sticky top-8">
+        <div className="bg-white p-6 rounded-lg border border-[#e5e5e5] shadow-figma space-y-6 sticky top-8">
           <div>
-            <h4 className="flex items-center gap-2 text-xs font-black text-gray-900 uppercase tracking-widest mb-4">
-              <Paintbrush size={14} className="text-indigo-600" />
+            <h4 className="flex items-center gap-2 text-[11px] font-semibold text-[#0d0d0d] uppercase tracking-wide mb-4">
+              <Paintbrush size={14} className="text-[#0d99ff]" strokeWidth={2} />
               Customization
             </h4>
             <div className="space-y-4">
@@ -353,7 +414,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
                 <div className="flex gap-2">
                   <input
                     type="color"
-                    className="h-9 w-12 rounded border border-gray-200 cursor-pointer"
+                    className="h-8 w-12 rounded border border-[#e5e5e5] cursor-pointer"
                     value={form.customizationColor}
                     onChange={(e) => update('customizationColor', e.target.value)}
                   />
@@ -368,9 +429,9 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
             </div>
           </div>
 
-          <div className="pt-6 border-t border-gray-100">
-            <h4 className="flex items-center gap-2 text-xs font-black text-gray-900 uppercase tracking-widest mb-4">
-              <DollarSign size={14} className="text-indigo-600" />
+          <div className="pt-6 border-t border-[#e5e5e5]">
+            <h4 className="flex items-center gap-2 text-[11px] font-semibold text-[#0d0d0d] uppercase tracking-wide mb-4">
+              <DollarSign size={14} className="text-[#0d99ff]" strokeWidth={2} />
               Financials
             </h4>
             <div className="space-y-4">

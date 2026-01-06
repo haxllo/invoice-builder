@@ -42,12 +42,16 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Left Side: Branding/Marketing */}
-      <div className="hidden lg:flex flex-col justify-center items-center w-1/2 bg-indigo-600 p-12 text-white">
-        <div className="max-w-md space-y-6">
-          <div className="inline-flex p-3 bg-white/10 rounded-2xl backdrop-blur-sm border border-white/20 mb-4">
-            <FileText size={40} className="text-white" />
+      <div className="hidden lg:flex flex-col justify-center items-center w-1/2 bg-gradient-to-br from-indigo-600 via-indigo-700 to-indigo-800 p-12 text-white relative overflow-hidden">
+        {/* Decorative elements */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -mr-48 -mt-48" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-white/5 rounded-full -ml-40 -mb-40" />
+        
+        <div className="max-w-md space-y-8 relative z-10 animate-fade-in">
+          <div className="inline-flex p-4 bg-white/10 rounded-3xl backdrop-blur-sm border border-white/20 mb-6 shadow-2xl">
+            <FileText size={48} className="text-white" />
           </div>
           <h1 className="text-5xl font-black tracking-tight leading-tight">
             Streamline your business billing.
@@ -56,13 +60,13 @@ export default function LoginPage() {
             Generate professional invoices, manage clients, and track your revenue all in one place.
           </p>
           <div className="grid grid-cols-2 gap-4 pt-8">
-            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-              <p className="text-2xl font-bold">100%</p>
-              <p className="text-xs text-indigo-200 uppercase font-bold tracking-widest mt-1">Secure</p>
+            <div className="p-5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-200 group cursor-pointer">
+              <p className="text-3xl font-black group-hover:scale-110 transition-transform">100%</p>
+              <p className="text-xs text-indigo-200 uppercase font-black tracking-widest mt-2">Secure</p>
             </div>
-            <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-              <p className="text-2xl font-bold">Cloud</p>
-              <p className="text-xs text-indigo-200 uppercase font-bold tracking-widest mt-1">Ready</p>
+            <div className="p-5 bg-white/5 rounded-2xl border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-all duration-200 group cursor-pointer">
+              <p className="text-3xl font-black group-hover:scale-110 transition-transform">Cloud</p>
+              <p className="text-xs text-indigo-200 uppercase font-black tracking-widest mt-2">Ready</p>
             </div>
           </div>
         </div>
@@ -70,19 +74,19 @@ export default function LoginPage() {
 
       {/* Right Side: Form */}
       <div className="flex flex-col justify-center items-center w-full lg:w-1/2 p-8 sm:p-12 bg-white">
-        <div className="w-full max-w-sm space-y-8">
+        <div className="w-full max-w-sm space-y-8 animate-slide-in">
           <div className="lg:hidden text-center mb-8">
-            <div className="inline-flex p-2 bg-indigo-50 rounded-xl text-indigo-600 mb-4">
+            <div className="inline-flex p-3 bg-indigo-50 rounded-2xl text-indigo-600 mb-4 shadow-lg">
               <FileText size={32} />
             </div>
             <h2 className="text-2xl font-black text-gray-900">InvoiceBuilder</h2>
           </div>
 
           <div className="space-y-2 text-center lg:text-left">
-            <h2 className="text-3xl font-black text-gray-900 tracking-tight">
+            <h2 className="text-4xl font-black text-gray-900 tracking-tight">
               {isLogin ? 'Welcome Back' : 'Create Account'}
             </h2>
-            <p className="text-gray-500 font-medium italic">
+            <p className="text-gray-500 font-medium">
               {isLogin 
                 ? "Enter your credentials to access your dashboard" 
                 : "Join us and start building your first invoice today"}
@@ -90,16 +94,16 @@ export default function LoginPage() {
           </div>
 
           {/* Tab Toggle */}
-          <div className="flex p-1 bg-gray-100 rounded-xl">
+          <div className="flex p-1.5 bg-gray-100 rounded-2xl">
             <button 
               onClick={() => { setIsLogin(true); setError(null); }}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${isLogin ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`flex-1 py-3 text-sm font-black rounded-xl transition-all duration-200 ${isLogin ? 'bg-white text-indigo-600 shadow-lg' : 'text-gray-500 hover:text-gray-700'}`}
             >
               Sign In
             </button>
             <button 
               onClick={() => { setIsLogin(false); setError(null); }}
-              className={`flex-1 py-2 text-sm font-bold rounded-lg transition-all ${!isLogin ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
+              className={`flex-1 py-3 text-sm font-black rounded-xl transition-all duration-200 ${!isLogin ? 'bg-white text-indigo-600 shadow-lg' : 'text-gray-500 hover:text-gray-700'}`}
             >
               Sign Up
             </button>
@@ -147,15 +151,18 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="p-3 bg-red-50 border border-red-100 rounded-xl flex gap-3 animate-in fade-in slide-in-from-top-1">
-                <div className="text-red-600 text-xs font-bold leading-relaxed">{error}</div>
+              <div className="p-4 bg-red-50 border-2 border-red-100 rounded-2xl flex gap-3 animate-slide-in">
+                <div className="flex-shrink-0 w-6 h-6 bg-red-100 rounded-full flex items-center justify-center">
+                  <span className="text-red-600 font-black text-xs">!</span>
+                </div>
+                <div className="text-red-700 text-sm font-bold leading-relaxed">{error}</div>
               </div>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="group relative w-full flex items-center justify-center py-3.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-sm shadow-xl shadow-indigo-100 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+              className="group relative w-full flex items-center justify-center py-4 px-4 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white rounded-2xl font-black text-sm shadow-2xl shadow-indigo-200 transition-all active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed hover:-translate-y-0.5"
             >
               {loading ? (
                 <Loader2 size={20} className="animate-spin" />

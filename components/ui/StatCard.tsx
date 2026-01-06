@@ -10,27 +10,25 @@ interface StatCardProps {
   trendType?: 'positive' | 'negative' | 'neutral';
 }
 
-export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, trend, trendType }) => {
+export const StatCard: React.FC<StatCardProps> = ({ label, value, icon, trend, trendType = 'neutral' }) => {
   return (
-    <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-sm font-medium text-gray-500">{label}</p>
-          <h3 className="text-2xl font-bold text-gray-900 mt-1">{value}</h3>
-          
-          {trend && (
-            <p className={`text-xs mt-2 font-medium ${
-              trendType === 'positive' ? 'text-green-600' : 
-              trendType === 'negative' ? 'text-red-600' : 'text-gray-500'
-            }`}>
-              {trend}
-            </p>
-          )}
-        </div>
-        <div className="p-3 bg-indigo-50 rounded-lg text-indigo-600">
+    <div className="bg-white p-5 rounded-lg border border-[#e5e5e5] hover:border-[#0d99ff] transition-all duration-200 shadow-figma-sm hover:shadow-figma cursor-pointer">
+      <div className="flex items-start justify-between mb-3">
+        <div className="w-8 h-8 rounded bg-[#f5f5f5] flex items-center justify-center text-[#666]">
           {icon}
         </div>
+        {trend && (
+          <div className={`text-[11px] font-medium px-2 py-0.5 rounded ${
+            trendType === 'positive' ? 'text-[#0fa958] bg-[#e6f9f0]' : 
+            trendType === 'negative' ? 'text-[#f24822] bg-[#fff0f0]' : 
+            'text-[#666] bg-[#f5f5f5]'
+          }`}>
+            {trend}
+          </div>
+        )}
       </div>
+      <div className="text-2xl font-semibold text-[#0d0d0d] mb-1">{value}</div>
+      <div className="text-[13px] text-[#666] font-medium">{label}</div>
     </div>
   );
 };

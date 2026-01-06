@@ -7,8 +7,9 @@ import { useBusinessUpdate } from '@/lib/hooks/useBusinessUpdate';
 import { Business, BusinessFromData, BusinessAdd, BusinessUpdate } from '@/lib/shared/types/business';
 import { GenericModal } from '@/components/modals/GenericModal';
 import { BusinessForm } from '@/components/forms/business/BusinessForm';
-import { Plus, Briefcase, Mail, MapPin, Settings } from 'lucide-react';
+import { Plus, Briefcase, Mail, MapPin, Edit2 } from 'lucide-react';
 import { useAuth } from '@/lib/context/AuthContext';
+import { Button } from '@/components/ui/button';
 
 export default function BusinessesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -62,104 +63,85 @@ export default function BusinessesPage() {
     setIsModalOpen(true);
   };
 
-  if (authLoading) {
-    return <div className="flex h-screen items-center justify-center font-medium text-gray-600">Loading...</div>;
-  }
-
+  if (authLoading) return null;
   if (!user) return null;
 
   return (
-    <div className="mx-auto max-w-7xl p-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Businesses</h1>
-          <p className="mt-1 text-sm text-gray-500 font-medium italic">Manage your legal entities and branding profiles.</p>
+    <div className="min-h-screen bg-[#f5f5f5] p-6 animate-fade-in">
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-[#0d0d0d] mb-1">Businesses</h1>
+            <p className="text-[13px] text-[#666]">Manage your business profiles</p>
+          </div>
+          <Button onClick={openAddModal}>
+            <Plus size={16} strokeWidth={2} />
+            Add Business
+          </Button>
         </div>
-        <button
-          onClick={openAddModal}
-          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-indigo-700 transition-all shadow-indigo-100"
-        >
-          <Plus size={18} />
-          Add Business
-        </button>
-      </div>
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200 text-left">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Entity</th>
-              <th scope="col" className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Contact & Address</th>
-              <th scope="col" className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Status</th>
-              <th scope="col" className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
-            {businesses.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="px-6 py-12 text-center">
-                  <Briefcase className="mx-auto h-10 w-10 text-gray-300 mb-3" />
-                  <p className="text-gray-500 font-medium">No business profiles created yet</p>
-                </td>
-              </tr>
-            ) : (
-              businesses.map((business) => (
-                <tr key={business.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center gap-4">
-                      {business.logo ? (
-                        <img src={business.logo as any} alt={business.name} className="h-10 w-10 shrink-0 rounded-lg object-cover shadow-sm border border-gray-100" />
-                      ) : (
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 font-extrabold shadow-inner">
-                          {business.shortName}
-                        </div>
-                      )}
-                      <div>
-                        <div className="text-sm font-bold text-gray-900">{business.name}</div>
-                        <div className="text-xs text-gray-500 font-medium italic">{business.role || 'Primary Entity'}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4">
-                    <div className="flex flex-col gap-1">
-                      <div className="flex items-center text-sm text-gray-600 font-medium">
-                        <Mail size={14} className="mr-2 text-gray-400" />
-                        {business.email || '--'}
-                      </div>
-                      <div className="flex items-center text-sm text-gray-600 truncate max-w-xs">
-                        <MapPin size={14} className="mr-2 text-gray-400" />
-                        {business.address || '--'}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className={`
-                      inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide
-                      ${business.isArchived ? 'bg-gray-100 text-gray-600' : 'bg-emerald-100 text-green-700'}
-                    `}>
-                      {business.isArchived ? 'Archived' : 'Active'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button 
-                      onClick={() => openEditModal(business)}
-                      className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                    >
-                      <Settings size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+        {/* Businesses Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {businesses.length === 0 ? (
+            <div className="col-span-full bg-white rounded-lg border border-[#e5e5e5] p-12 text-center shadow-figma-sm">
+              <div className="w-12 h-12 bg-[#f5f5f5] rounded-full flex items-center justify-center mx-auto mb-3">
+                <Briefcase size={20} className="text-[#999]" strokeWidth={2} />
+              </div>
+              <p className="text-[#666] text-[13px] font-medium mb-1">No businesses found</p>
+              <button
+                onClick={openAddModal}
+                className="mt-3 text-[#0d99ff] text-[13px] font-medium hover:underline"
+              >
+                Create your first business →
+              </button>
+            </div>
+          ) : (
+            businesses.map((business) => (
+              <div key={business.id} className="bg-white rounded-lg border border-[#e5e5e5] p-5 hover:border-[#0d99ff] transition-colors shadow-figma-sm hover:shadow-figma cursor-pointer group">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-12 h-12 bg-[#f5f5f5] rounded flex items-center justify-center">
+                    {business.logo ? (
+                      <img src={typeof business.logo === "string" ? business.logo : ""} alt={business.name} className="w-full h-full object-contain rounded" />
+                    ) : (
+                      <Briefcase size={20} className="text-[#999]" strokeWidth={2} />
+                    )}
+                  </div>
+                  <button
+                    onClick={() => openEditModal(business)}
+                    className="w-7 h-7 flex items-center justify-center text-[#666] hover:text-[#0d99ff] hover:bg-[#f5f5f5] rounded transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <Edit2 size={16} strokeWidth={2} />
+                  </button>
+                </div>
+                
+                <h3 className="text-[15px] font-semibold text-[#0d0d0d] mb-1">{business.name}</h3>
+                <p className="text-[11px] text-[#999] uppercase font-medium mb-3">{business.shortName}</p>
+                
+                {business.email && (
+                  <div className="flex items-center gap-2 text-[13px] text-[#666] mb-2">
+                    <Mail size={14} strokeWidth={2} />
+                    <span className="truncate">{business.email}</span>
+                  </div>
+                )}
+                
+                {business.address && (
+                  <div className="flex items-start gap-2 text-[13px] text-[#666]">
+                    <MapPin size={14} strokeWidth={2} className="mt-0.5 flex-shrink-0" />
+                    <span className="line-clamp-2">{business.address}</span>
+                  </div>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       <GenericModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
-        title={editingBusiness ? 'Edit Business Profile' : 'Create Business Profile'}
+        title={editingBusiness ? 'Edit Business' : 'Add New Business'}
         isSaveDisabled={!formData?.isValid}
         loading={adding || updating}
       >

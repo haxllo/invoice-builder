@@ -17,6 +17,7 @@ import {
   Clock,
   FileText
 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export default function SettingsPage() {
   const { settings, loading: fetching } = useSettingsRetrieve({ immediate: true });
@@ -56,35 +57,34 @@ export default function SettingsPage() {
     return <div className="flex h-screen items-center justify-center font-medium text-gray-500 italic">Loading configuration...</div>;
   }
 
-  const labelClasses = "block text-xs font-bold text-gray-500 uppercase tracking-wider mb-1 ml-1";
-  const inputClasses = "block w-full pl-10 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-indigo-500 focus:border-indigo-500 text-gray-900 bg-white transition-all";
-  const sectionHeaderClasses = "flex items-center gap-2 text-sm font-black text-gray-900 uppercase tracking-widest border-b pb-2 mb-6";
+  const labelClasses = "block text-[11px] font-semibold text-[#666] uppercase tracking-wide mb-1.5";
+  const inputClasses = "block w-full pl-10 pr-3 h-8 border border-[#e5e5e5] rounded text-[13px] focus:border-[#0d99ff] text-[#0d0d0d] bg-white hover:border-[#999] transition-colors";
+  const sectionHeaderClasses = "flex items-center gap-2 text-[11px] font-semibold text-[#0d0d0d] uppercase tracking-wide border-b border-[#e5e5e5] pb-2 mb-6";
 
   return (
     <div className="mx-auto max-w-4xl p-8">
       <div className="flex justify-between items-end mb-10">
         <div>
           <div className="flex items-center gap-3 mb-1">
-            <SettingsIcon className="text-indigo-600" size={28} />
+            <SettingsIcon className="text-[#0d99ff]" size={28} />
             <h1 className="text-3xl font-bold text-gray-900 tracking-tight">System Settings</h1>
           </div>
           <p className="text-sm text-gray-500 font-medium italic pl-10">Configure your global preferences and document defaults.</p>
         </div>
-        <button
+        <Button
           onClick={() => updateSettings()}
           disabled={updating}
-          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white shadow-md shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-50"
         >
-          <Save size={18} />
+          <Save size={18} strokeWidth={2} />
           {updating ? 'Saving...' : 'Save Changes'}
-        </button>
+        </Button>
       </div>
 
       <div className="space-y-12">
         {/* Localization */}
         <section className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
           <h4 className={sectionHeaderClasses}>
-            <Globe size={16} className="text-indigo-600" />
+            <Globe size={16} className="text-[#0d99ff]" />
             Regional & Display
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -124,7 +124,7 @@ export default function SettingsPage() {
             <div className="md:col-span-2">
               <div className="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-100">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white rounded-lg shadow-sm text-indigo-600 border border-gray-100">
+                  <div className="p-2 bg-white rounded-lg shadow-sm text-[#0d99ff] border border-gray-100">
                     <Eye size={18} />
                   </div>
                   <div>
@@ -134,7 +134,7 @@ export default function SettingsPage() {
                 </div>
                 <input
                   type="checkbox"
-                  className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
+                  className="h-5 w-5 text-[#0d99ff] focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
                   checked={formData.isDarkMode}
                   onChange={(e) => handleChange('isDarkMode', e.target.checked)}
                 />
@@ -146,7 +146,7 @@ export default function SettingsPage() {
         {/* Invoice Numbering */}
         <section className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
           <h4 className={sectionHeaderClasses}>
-            <Hash size={16} className="text-indigo-600" />
+            <Hash size={16} className="text-[#0d99ff]" />
             Document Numbering
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -189,7 +189,7 @@ export default function SettingsPage() {
                 </div>
                 <input
                   type="checkbox"
-                  className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
+                  className="h-5 w-5 text-[#0d99ff] focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
                   checked={formData.shouldIncludeYear}
                   onChange={(e) => handleChange('shouldIncludeYear', e.target.checked)}
                 />
@@ -201,7 +201,7 @@ export default function SettingsPage() {
                 </div>
                 <input
                   type="checkbox"
-                  className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
+                  className="h-5 w-5 text-[#0d99ff] focus:ring-indigo-500 border-gray-300 rounded cursor-pointer"
                   checked={formData.shouldIncludeMonth}
                   onChange={(e) => handleChange('shouldIncludeMonth', e.target.checked)}
                 />
@@ -213,36 +213,36 @@ export default function SettingsPage() {
         {/* Modules */}
         <section className="bg-white rounded-xl border border-gray-200 p-8 shadow-sm">
           <h4 className={sectionHeaderClasses}>
-            <Layout size={16} className="text-indigo-600" />
+            <Layout size={16} className="text-[#0d99ff]" />
             Module Configuration
           </h4>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-indigo-50/30 rounded-xl border border-indigo-100">
               <div className="flex items-center gap-3">
-                <Database size={18} className="text-indigo-600" />
+                <Database size={18} className="text-[#0d99ff]" />
                 <div>
                   <p className="text-sm font-bold text-indigo-900">Enable Quotes System</p>
-                  <p className="text-xs text-indigo-600 font-medium italic">Allow creation of estimates and proposals.</p>
+                  <p className="text-xs text-[#0d99ff] font-medium italic">Allow creation of estimates and proposals.</p>
                 </div>
               </div>
               <input
                 type="checkbox"
-                className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-indigo-300 rounded cursor-pointer"
+                className="h-5 w-5 text-[#0d99ff] focus:ring-indigo-500 border-indigo-300 rounded cursor-pointer"
                 checked={formData.quotesON}
                 onChange={(e) => handleChange('quotesON', e.target.checked)}
               />
             </div>
             <div className="flex items-center justify-between p-4 bg-indigo-50/30 rounded-xl border border-indigo-100">
               <div className="flex items-center gap-3">
-                <FileText size={18} className="text-indigo-600" />
+                <FileText size={18} className="text-[#0d99ff]" />
                 <div>
                   <p className="text-sm font-bold text-indigo-900">Enable Reports Engine</p>
-                  <p className="text-xs text-indigo-600 font-medium italic">Generate business performance insights.</p>
+                  <p className="text-xs text-[#0d99ff] font-medium italic">Generate business performance insights.</p>
                 </div>
               </div>
               <input
                 type="checkbox"
-                className="h-5 w-5 text-indigo-600 focus:ring-indigo-500 border-indigo-300 rounded cursor-pointer"
+                className="h-5 w-5 text-[#0d99ff] focus:ring-indigo-500 border-indigo-300 rounded cursor-pointer"
                 checked={formData.reportsON}
                 onChange={(e) => handleChange('reportsON', e.target.checked)}
               />

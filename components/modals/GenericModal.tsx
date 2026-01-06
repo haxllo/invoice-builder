@@ -1,7 +1,7 @@
 'use client';
 
-import React, { ReactNode } from 'react';
-import { X } from 'lucide-react';
+import React, { ReactNode, useEffect } from 'react';
+import { X, Loader2 } from 'lucide-react';
 
 interface GenericModalProps {
   isOpen: boolean;
@@ -26,32 +26,51 @@ export const GenericModal: React.FC<GenericModalProps> = ({
   isSaveDisabled = false,
   loading = false,
 }) => {
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-50 overflow-y-auto">
-      <div className="relative w-full max-w-2xl bg-white rounded-lg shadow-xl overflow-hidden flex flex-col max-h-[90vh]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 animate-fade-in">
+      {/* Backdrop */}
+      <div 
+        className="absolute inset-0 bg-black/20"
+        onClick={onClose}
+      />
+      
+      {/* Modal */}
+      <div className="relative w-full max-w-2xl bg-white rounded-lg border border-[#e5e5e5] shadow-figma-lg overflow-hidden flex flex-col max-h-[85vh] animate-slide-in">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
+        <div className="flex items-center justify-between px-5 h-14 border-b border-[#e5e5e5]">
+          <h3 className="text-[13px] font-semibold text-[#0d0d0d]">{title}</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-500 transition-colors"
+            className="w-6 h-6 flex items-center justify-center rounded hover:bg-[#f5f5f5] text-[#666] hover:text-[#0d0d0d] transition-colors"
+            aria-label="Close modal"
           >
-            <X size={20} />
+            <X size={16} strokeWidth={2} />
           </button>
         </div>
 
         {/* Body */}
-        <div className="p-6 overflow-y-auto flex-grow">
+        <div className="p-5 overflow-y-auto flex-grow">
           {children}
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 py-4 bg-gray-50 border-t">
+        <div className="flex justify-end gap-2 px-5 h-14 items-center border-t border-[#e5e5e5] bg-[#fafafa]">
           <button
             onClick={onClose}
-            className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+            className="h-8 px-3 text-[13px] font-medium text-[#0d0d0d] rounded hover:bg-[#f0f0f0] transition-colors"
           >
             {cancelLabel}
           </button>
@@ -59,8 +78,9 @@ export const GenericModal: React.FC<GenericModalProps> = ({
             <button
               onClick={onSave}
               disabled={isSaveDisabled || loading}
-              className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+              className="h-8 px-3 text-[13px] font-medium text-white bg-[#0d99ff] rounded hover:bg-[#0c8ce6] disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
             >
+              {loading && <Loader2 size={14} className="animate-spin" />}
               {loading ? 'Saving...' : saveLabel}
             </button>
           )}

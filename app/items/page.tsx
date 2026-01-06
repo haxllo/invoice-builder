@@ -4,22 +4,26 @@ import React, { useState } from 'react';
 import { useItemsRetrieve } from '@/lib/hooks/useItemsRetrieve';
 import { useItemAdd } from '@/lib/hooks/useItemAdd';
 import { useItemUpdate } from '@/lib/hooks/useItemUpdate';
-import { Item, ItemAdd, ItemUpdate } from '@/lib/shared/types/item';
+import { Item, ItemFromData, ItemAdd, ItemUpdate } from '@/lib/shared/types/item';
 import { GenericModal } from '@/components/modals/GenericModal';
 import { ItemForm } from '@/components/forms/item/ItemForm';
-import { Plus, Package, DollarSign, Settings, Tag } from 'lucide-react';
+import { Plus, Package, DollarSign, Edit2 } from 'lucide-react';
+import { useAuth } from '@/lib/context/AuthContext';
 
+import { Button } from '@/components/ui/button';
 export default function ItemsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<Item | undefined>(undefined);
-  const [formData, setFormData] = useState<{ item: ItemAdd; isValid: boolean } | null>(null);
+  const [formData, setFormData] = useState<{ item: ItemFromData; isValid: boolean } | null>(null);
+  
+  const { user, loading: authLoading } = useAuth();
 
-  const { items, execute: refreshItems, loading: fetching } = useItemsRetrieve({
-    immediate: true,
+  const { items, execute: refreshItems } = useItemsRetrieve({
+    immediate: !!user,
   });
 
   const { execute: addItem, loading: adding } = useItemAdd({
-    item: formData?.item,
+    item: formData?.item as ItemAdd,
     immediate: false,
     onDone: (res) => {
       if (res.success) {
@@ -59,88 +63,75 @@ export default function ItemsPage() {
     setIsModalOpen(true);
   };
 
-  return (
-    <div className="mx-auto max-w-7xl p-8">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Products & Services</h1>
-          <p className="mt-1 text-sm text-gray-500 font-medium italic">Define your reusable billable items for quick invoice creation.</p>
-        </div>
-        <button
-          onClick={openAddModal}
-          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-bold text-white shadow-sm hover:bg-indigo-700 transition-all shadow-indigo-100"
-        >
-          <Plus size={18} />
-          Add New Item
-        </button>
-      </div>
+  if (authLoading) return null;
+  if (!user) return null;
 
-      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200 text-left">
-          <thead className="bg-gray-50">
-            <tr>
-              <th scope="col" className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Item Details</th>
-              <th scope="col" className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider">Default Price</th>
-              <th scope="col" className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-center">Status</th>
-              <th scope="col" className="px-6 py-4 text-xs font-bold text-gray-500 uppercase tracking-wider text-right">Actions</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-100">
-            {items.length === 0 ? (
-              <tr>
-                <td colSpan={4} className="px-6 py-12 text-center">
-                  <Package className="mx-auto h-10 w-10 text-gray-300 mb-3" />
-                  <p className="text-gray-500 font-medium">Your item catalog is empty</p>
-                </td>
-              </tr>
-            ) : (
-              items.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50/50 transition-colors group">
-                  <td className="px-6 py-4">
-                    <div className="flex items-center gap-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600 font-extrabold shadow-inner">
-                        <Tag size={18} />
-                      </div>
-                      <div>
-                        <div className="text-sm font-bold text-gray-900">{item.name}</div>
-                        <div className="text-xs text-gray-500 font-medium italic line-clamp-1 max-w-xs">{item.description || 'No description provided'}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center text-sm font-black text-gray-900">
-                      <DollarSign size={14} className="text-gray-400 mr-0.5" />
-                      {parseFloat(item.amount || '0').toFixed(2)}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-center">
-                    <span className={`
-                      inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wide
-                      ${item.isArchived ? 'bg-gray-100 text-gray-600' : 'bg-emerald-100 text-green-700'}
-                    `}>
-                      {item.isArchived ? 'Archived' : 'Active'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button 
-                      onClick={() => openEditModal(item)}
-                      className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
-                    >
-                      <Settings size={18} />
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+  return (
+    <div className="min-h-screen bg-[#f5f5f5] p-6 animate-fade-in">
+      <div className="mx-auto max-w-7xl">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div>
+            <h1 className="text-2xl font-semibold text-[#0d0d0d] mb-1">Items Catalog</h1>
+            <p className="text-[13px] text-[#666]">Products and services you offer</p>
+          </div>
+          <Button onClick={openAddModal}>
+            <Plus size={16} strokeWidth={2} />
+            Add Item
+          </Button>
+        </div>
+
+        {/* Items Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.length === 0 ? (
+            <div className="col-span-full bg-white rounded-lg border border-[#e5e5e5] p-12 text-center shadow-figma-sm">
+              <div className="w-12 h-12 bg-[#f5f5f5] rounded-full flex items-center justify-center mx-auto mb-3">
+                <Package size={20} className="text-[#999]" strokeWidth={2} />
+              </div>
+              <p className="text-[#666] text-[13px] font-medium mb-1">No items found</p>
+              <button
+                onClick={openAddModal}
+                className="mt-3 text-[#0d99ff] text-[13px] font-medium hover:underline"
+              >
+                Add your first item →
+              </button>
+            </div>
+          ) : (
+            items.map((item) => (
+              <div key={item.id} className="bg-white rounded-lg border border-[#e5e5e5] p-5 hover:border-[#0d99ff] transition-colors shadow-figma-sm hover:shadow-figma cursor-pointer group">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="w-10 h-10 bg-[#f5f5f5] rounded flex items-center justify-center">
+                    <Package size={18} className="text-[#666]" strokeWidth={2} />
+                  </div>
+                  <button
+                    onClick={() => openEditModal(item)}
+                    className="w-7 h-7 flex items-center justify-center text-[#666] hover:text-[#0d99ff] hover:bg-[#f5f5f5] rounded transition-colors opacity-0 group-hover:opacity-100"
+                  >
+                    <Edit2 size={16} strokeWidth={2} />
+                  </button>
+                </div>
+                
+                <h3 className="text-[15px] font-semibold text-[#0d0d0d] mb-2">{item.name}</h3>
+                
+                <div className="flex items-center gap-2 text-[15px] font-semibold text-[#0d99ff]">
+                  <DollarSign size={14} strokeWidth={2} />
+                  <span>{parseFloat(item.amount || "0").toFixed(2)}</span>
+                </div>
+                
+                {item.description && (
+                  <p className="text-[13px] text-[#666] mt-3 line-clamp-2">{item.description}</p>
+                )}
+              </div>
+            ))
+          )}
+        </div>
       </div>
 
       <GenericModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={handleSave}
-        title={editingItem ? 'Edit Item Details' : 'Create New Item'}
+        title={editingItem ? 'Edit Item' : 'Add New Item'}
         isSaveDisabled={!formData?.isValid}
         loading={adding || updating}
       >
