@@ -5,15 +5,22 @@ import { useInvoicesRetrieve } from '@/lib/hooks/useInvoicesRetrieve';
 import { useInvoiceAdd } from '@/lib/hooks/useInvoiceAdd';
 import { useInvoiceUpdate } from '@/lib/hooks/useInvoiceUpdate';
 import { useInvoiceDelete } from '@/lib/hooks/useInvoiceDelete';
-import { Invoice, InvoiceAdd } from '@/lib/shared/types/invoice';
+import { Invoice, InvoiceAdd, InvoiceUpdate } from '@/lib/shared/types/invoice';
 import { GenericModal } from '@/components/modals/GenericModal';
 import { InvoiceForm } from '@/components/forms/invoice/InvoiceForm';
-import { Plus, FileText, Settings, Trash } from 'lucide-react';
+import { Plus, FileText, Settings, Trash, Download } from 'lucide-react';
+import { PDFDownloadLink } from '@react-pdf/renderer';
+import { InvoicePDF } from '@/components/invoice/InvoicePDF';
 
 export default function InvoicesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingInvoice, setEditingInvoice] = useState<Invoice | undefined>(undefined);
   const [formData, setFormData] = useState<{ invoice: InvoiceAdd; isValid: boolean } | null>(null);
+  const [isClient, setIsClient] = useState(false);
+
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const { invoices, execute: refreshInvoices, loading: fetching } = useInvoicesRetrieve({
     immediate: true,
@@ -31,7 +38,7 @@ export default function InvoicesPage() {
   });
 
   const { execute: updateInvoice, loading: updating } = useInvoiceUpdate({
-    invoice: formData?.invoice as any,
+    invoice: formData?.invoice as InvoiceUpdate,
     immediate: false,
     onDone: (res) => {
       if (res.success) {
@@ -160,6 +167,16 @@ export default function InvoicesPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex justify-end gap-2">
+                        {isClient && (
+                          <PDFDownloadLink
+                            document={<InvoicePDF invoice={invoice} />}
+                            fileName={`Invoice-${invoice.invoiceNumber}.pdf`}
+                            className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"
+                            title="Download PDF"
+                          >
+                            <Download size={18} />
+                          </PDFDownloadLink>
+                        )}
                         <button 
                           onClick={() => openEditModal(invoice)}
                           className="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-all"

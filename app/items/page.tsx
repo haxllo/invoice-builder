@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useItemsRetrieve } from '@/lib/hooks/useItemsRetrieve';
 import { useItemAdd } from '@/lib/hooks/useItemAdd';
 import { useItemUpdate } from '@/lib/hooks/useItemUpdate';
-import { Item, ItemAdd } from '@/lib/shared/types/item';
+import { Item, ItemAdd, ItemUpdate } from '@/lib/shared/types/item';
 import { GenericModal } from '@/components/modals/GenericModal';
 import { ItemForm } from '@/components/forms/item/ItemForm';
 import { Plus, Package, DollarSign, Settings, Tag } from 'lucide-react';
@@ -30,7 +30,7 @@ export default function ItemsPage() {
   });
 
   const { execute: updateItem, loading: updating } = useItemUpdate({
-    item: formData?.item as any,
+    item: formData?.item as ItemUpdate,
     immediate: false,
     onDone: (res) => {
       if (res.success) {

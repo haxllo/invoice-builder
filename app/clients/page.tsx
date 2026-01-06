@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useClientsRetrieve } from '@/lib/hooks/useClientsRetrieve';
 import { useClientAdd } from '@/lib/hooks/useClientAdd';
 import { useClientUpdate } from '@/lib/hooks/useClientUpdate';
-import { Client, ClientAdd } from '@/lib/shared/types/client';
+import { Client, ClientAdd, ClientUpdate } from '@/lib/shared/types/client';
 import { GenericModal } from '@/components/modals/GenericModal';
 import { ClientForm } from '@/components/forms/client/ClientForm';
 import { Plus, User, Mail, Phone, Settings } from 'lucide-react';
@@ -30,7 +30,7 @@ export default function ClientsPage() {
   });
 
   const { execute: updateClient, loading: updating } = useClientUpdate({
-    client: formData?.client as any,
+    client: formData?.client as ClientUpdate,
     immediate: false,
     onDone: (res) => {
       if (res.success) {

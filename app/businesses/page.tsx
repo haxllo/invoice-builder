@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import { useBusinessesRetrieve } from '@/lib/hooks/useBusinessesRetrieve';
 import { useBusinessAdd } from '@/lib/hooks/useBusinessAdd';
 import { useBusinessUpdate } from '@/lib/hooks/useBusinessUpdate';
-import { Business, BusinessFromData } from '@/lib/shared/types/business';
+import { Business, BusinessFromData, BusinessAdd, BusinessUpdate } from '@/lib/shared/types/business';
 import { GenericModal } from '@/components/modals/GenericModal';
 import { BusinessForm } from '@/components/forms/business/BusinessForm';
 import { Plus, Briefcase, Mail, MapPin, Settings } from 'lucide-react';
@@ -22,7 +22,7 @@ export default function BusinessesPage() {
   });
 
   const { execute: addBusiness, loading: adding } = useBusinessAdd({
-    business: formData?.business as any,
+    business: formData?.business as BusinessAdd,
     immediate: false,
     onDone: (res) => {
       if (res.success) {
@@ -33,7 +33,7 @@ export default function BusinessesPage() {
   });
 
   const { execute: updateBusiness, loading: updating } = useBusinessUpdate({
-    business: formData?.business as any,
+    business: formData?.business as BusinessUpdate,
     immediate: false,
     onDone: (res) => {
       if (res.success) {
