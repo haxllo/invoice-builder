@@ -59,11 +59,11 @@ export const useBusinessesRetrieve = ({
     return { success: true, data: data as unknown as Business[] };
   }, [filter]);
 
-  const { data: businesses, execute } = useAsyncAction<Response<Business[]>>(asyncFn, {
+  const { data: businesses, execute, loading } = useAsyncAction<Response<Business[]>>(asyncFn, {
     showLoader,
     immediate,
     onDone
   });
 
-  return { businesses: businesses?.data ?? [], execute };
+  return { businesses: businesses?.data ?? [], execute, loading };
 };

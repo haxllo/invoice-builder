@@ -38,7 +38,7 @@ export const useUnitsRetrieve = ({ showLoader = true, filter, onDone }: RequestH
     return { success: true, data: data as unknown as Unit[] };
   }, [filter]);
 
-  const { data: units, execute } = useAsyncAction<Response<Unit[]>>(asyncFn, { showLoader, onDone });
+  const { data: units, execute, loading } = useAsyncAction<Response<Unit[]>>(asyncFn, { showLoader, onDone });
 
   useEffect(() => {
     if (!units || !units.data) return;
@@ -52,5 +52,5 @@ export const useUnitsRetrieve = ({ showLoader = true, filter, onDone }: RequestH
     );
   }, [units, dispatch]);
 
-  return { units: units?.data ?? [], execute };
+  return { units: units?.data ?? [], execute, loading };
 };

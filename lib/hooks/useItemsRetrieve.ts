@@ -45,7 +45,7 @@ export const useItemsRetrieve = ({ showLoader = true, filter, onDone }: RequestH
     return { success: true, data: data as unknown as Item[] };
   }, [filter]);
 
-  const { data: items, execute } = useAsyncAction<Response<Item[]>>(asyncFn, { showLoader, onDone });
+  const { data: items, execute, loading } = useAsyncAction<Response<Item[]>>(asyncFn, { showLoader, onDone });
 
-  return { items: items?.data ?? [], execute };
+  return { items: items?.data ?? [], execute, loading };
 };

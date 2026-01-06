@@ -2,17 +2,17 @@
 
 import React, { useEffect } from 'react';
 import { useForm } from '@/lib/hooks/useForm';
-import type { Category, CategoryAdd } from '@/lib/shared/types/category';
+import type { Category, CategoryFromData } from '@/lib/shared/types/category';
 import { Layers, Info } from 'lucide-react';
 
 interface CategoryFormProps {
   category?: Category;
-  onChange?: (data: { category: CategoryAdd; isValid: boolean }) => void;
+  onChange?: (data: { category: CategoryFromData; isValid: boolean }) => void;
 }
 
 export const CategoryForm: React.FC<CategoryFormProps> = ({ onChange, category }) => {
-  const { form, update } = useForm<CategoryAdd>({
-    id: category?.id as any,
+  const { form, update } = useForm<CategoryFromData>({
+    id: category?.id,
     name: category?.name ?? '',
     isArchived: category?.isArchived ?? false
   });

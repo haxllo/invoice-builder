@@ -5,8 +5,10 @@ import { useForm } from '@/lib/hooks/useForm';
 import { useBusinessesRetrieve } from '@/lib/hooks/useBusinessesRetrieve';
 import { useClientsRetrieve } from '@/lib/hooks/useClientsRetrieve';
 import { useItemsRetrieve } from '@/lib/hooks/useItemsRetrieve';
-import type { Invoice, InvoiceAdd, InvoiceItemAdd } from '@/lib/shared/types/invoice';
+import type { Invoice, InvoiceAdd, InvoiceItem } from '@/lib/shared/types/invoice';
 import { Plus, Trash } from 'lucide-react';
+
+import { InvoiceItemTaxType } from '@/lib/shared/enums/taxType';
 
 interface InvoiceFormProps {
   invoice?: Invoice;
@@ -24,10 +26,10 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
     dueDate: invoice?.dueDate ?? '',
     businessId: invoice?.businessId ?? 0,
     clientId: invoice?.clientId ?? 0,
-    currencyId: invoice?.currencyId ?? 1, // Default to 1 (USD usually)
+    currencyId: invoice?.currencyId ?? 1,
     status: invoice?.status ?? 'unpaid',
     invoiceType: invoice?.invoiceType ?? 'invoice',
-    items: invoice?.invoice_items?.map(i => ({
+    invoiceItems: invoice?.invoiceItems?.map(i => ({
         itemId: i.itemId,
         itemNameSnapshot: i.itemNameSnapshot,
         unitPriceCentsSnapshot: i.unitPriceCentsSnapshot,
@@ -35,41 +37,49 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
         taxRate: i.taxRate,
         taxType: i.taxType
     })) ?? [],
-    // ... map other fields
     customerNotes: invoice?.customerNotes ?? '',
     termsConditionNotes: invoice?.termsConditionNotes ?? '',
-    // Snapshots will be populated on save/submit logic usually, but for UI we track IDs
-  } as any); // Type casting for speed in migration
+    businessNameSnapshot: invoice?.businessNameSnapshot ?? '',
+    businessShortNameSnapshot: invoice?.businessShortNameSnapshot ?? '',
+    businessAddressSnapshot: invoice?.businessAddressSnapshot ?? '',
+    businessEmailSnapshot: invoice?.businessEmailSnapshot ?? '',
+    businessPhoneSnapshot: invoice?.businessPhoneSnapshot ?? '',
+    businessRoleSnapshot: invoice?.businessRoleSnapshot ?? '',
+    businessLogoSnapshot: invoice?.businessLogoSnapshot ?? undefined,
+    clientNameSnapshot: invoice?.clientNameSnapshot ?? '',
+    clientAddressSnapshot: invoice?.clientAddressSnapshot ?? '',
+    clientEmailSnapshot: invoice?.clientEmailSnapshot ?? '',
+    clientPhoneSnapshot: invoice?.clientPhoneSnapshot ?? '',
+    clientCodeSnapshot: invoice?.clientCodeSnapshot ?? '',
+    currencyCodeSnapshot: invoice?.currencyCodeSnapshot ?? 'USD',
+    currencySymbolSnapshot: invoice?.currencySymbolSnapshot ?? '$',
+    currencySubunitSnapshot: invoice?.currencySubunitSnapshot ?? 100,
+  } as any);
 
-  // Helper to add item row
   const addItem = () => {
-    const newItem: InvoiceItemAdd = {
+    const newItem: InvoiceItem = {
       itemId: 0,
       itemNameSnapshot: '',
       unitPriceCentsSnapshot: 0,
       quantity: 1,
       taxRate: 0,
-      taxType: 'exclusive'
+      taxType: InvoiceItemTaxType.exclusive
     };
-    // @ts-ignore
-    update('items', [...(form.items || []), newItem]);
+    update('invoiceItems', [...(form.invoiceItems || []), newItem]);
   };
 
-  const updateItem = (index: number, field: keyof InvoiceItemAdd, value: any) => {
-    const newItems = [...(form.items || [])];
+  const updateItem = (index: number, field: keyof InvoiceItem, value: any) => {
+    const newItems = [...(form.invoiceItems || [])];
     newItems[index] = { ...newItems[index], [field]: value };
-    // @ts-ignore
-    update('items', newItems);
+    update('invoiceItems', newItems);
   };
 
   const removeItem = (index: number) => {
-    const newItems = [...(form.items || [])];
+    const newItems = [...(form.invoiceItems || [])];
     newItems.splice(index, 1);
-    // @ts-ignore
-    update('items', newItems);
+    update('invoiceItems', newItems);
   };
 
-  // Effect to validate and bubble up changes
   useEffect(() => {
     const isValid = form.invoiceNumber !== '' && form.businessId !== 0 && form.clientId !== 0;
     onChange?.({ invoice: form, isValid });
@@ -88,7 +98,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
             <input
               type="text"
               placeholder="INV-0001"
-              className="mt-1 block w-full text-2xl font-bold text-gray-900 border-none p-0 focus:ring-0 placeholder:text-gray-200"
+              className="mt-1 block w-full text-2xl font-bold text-gray-900 border-none p-0 focus:ring-0 placeholder:text-gray-200 bg-transparent"
               value={form.invoiceNumber}
               onChange={(e) => update('invoiceNumber', e.target.value)}
             />
@@ -100,8 +110,8 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
             <label className="block text-xs font-bold text-gray-400 uppercase">Issued Date</label>
             <input
               type="date"
-              className="mt-1 block w-full text-sm font-semibold text-gray-700 border-none p-0 focus:ring-0"
-              value={form.issuedAt.split('T')[0]}
+              className="mt-1 block w-full text-sm font-semibold text-gray-700 border-none p-0 focus:ring-0 bg-transparent"
+              value={form.issuedAt ? form.issuedAt.split('T')[0] : ''}
               onChange={(e) => update('issuedAt', new Date(e.target.value).toISOString())}
             />
           </div>
@@ -109,7 +119,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
             <label className="block text-xs font-bold text-gray-400 uppercase">Due Date</label>
             <input
               type="date"
-              className="mt-1 block w-full text-sm font-semibold text-gray-700 border-none p-0 focus:ring-0"
+              className="mt-1 block w-full text-sm font-semibold text-gray-700 border-none p-0 focus:ring-0 bg-transparent"
               value={form.dueDate ? form.dueDate.split('T')[0] : ''}
               onChange={(e) => update('dueDate', new Date(e.target.value).toISOString())}
             />
@@ -139,7 +149,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
                     businessPhoneSnapshot: b.phone || '',
                     businessRoleSnapshot: b.role || '',
                     businessLogoSnapshot: typeof b.logo === 'string' ? b.logo : ''
-                  }));
+                  } as any));
                 }
               }}
             >
@@ -174,7 +184,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
                     clientEmailSnapshot: c.email || '',
                     clientPhoneSnapshot: c.phone || '',
                     clientCodeSnapshot: c.code || ''
-                  }));
+                  } as any));
                 }
               }}
             >
@@ -210,8 +220,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
-                {/* @ts-ignore */}
-                {form.items?.map((item: InvoiceItemAdd, index: number) => (
+                {form.invoiceItems?.map((item: any, index: number) => (
                   <tr key={index} className="group hover:bg-gray-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex flex-col gap-2">
@@ -235,17 +244,17 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
                         </select>
                         <input
                           type="text"
-                          className="block w-full border-none p-0 text-sm font-medium text-gray-900 bg-transparent focus:ring-0 placeholder:text-gray-300"
+                          className="block w-full border-none p-0 text-sm font-medium text-gray-900 bg-transparent focus:ring-0 placeholder:text-gray-300 outline-none"
                           value={item.itemNameSnapshot}
                           onChange={(e) => updateItem(index, 'itemNameSnapshot', e.target.value)}
                           placeholder="What service or product are you providing?"
                         />
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 text-center">
                       <input
                         type="number"
-                        className="block w-full border-none p-0 text-center font-semibold text-gray-700 bg-transparent focus:ring-0"
+                        className="w-16 border-none p-0 text-center font-semibold text-gray-700 bg-transparent focus:ring-0 outline-none"
                         value={item.quantity}
                         onChange={(e) => updateItem(index, 'quantity', Number(e.target.value))}
                       />
@@ -255,13 +264,13 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
                         <span className="text-xs text-gray-400 mr-1">$</span>
                         <input
                           type="number"
-                          className="w-20 border-none p-0 text-right focus:ring-0 bg-transparent"
+                          className="w-20 border-none p-0 text-right focus:ring-0 bg-transparent outline-none"
                           value={item.unitPriceCentsSnapshot / 100}
                           onChange={(e) => updateItem(index, 'unitPriceCentsSnapshot', Number(e.target.value) * 100)}
                         />
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right font-bold text-gray-900">
+                    <td className="px-6 py-4 text-right font-bold text-gray-900 whitespace-nowrap">
                       ${((item.quantity * item.unitPriceCentsSnapshot) / 100).toFixed(2)}
                     </td>
                     <td className="px-4 py-4 text-right">
@@ -279,7 +288,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
             <div className="bg-gray-50/50 p-4 border-t border-gray-100">
               <button
                 onClick={addItem}
-                className="flex items-center gap-2 text-xs font-bold text-indigo-600 hover:text-indigo-700 tracking-wider uppercase"
+                className="flex items-center gap-2 text-xs font-bold text-indigo-600 hover:text-indigo-700 tracking-wider uppercase transition-colors"
               >
                 <Plus size={14} /> Add Line Item
               </button>
@@ -295,7 +304,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
               <textarea
                 rows={3}
                 placeholder="Include payment terms, bank details or a simple thank you..."
-                className="block w-full rounded-lg border-gray-200 bg-gray-50 text-sm focus:ring-indigo-500 focus:border-indigo-500 placeholder:italic"
+                className="block w-full rounded-lg border-gray-200 bg-gray-50 text-sm focus:ring-indigo-500 focus:border-indigo-500 placeholder:italic p-3 outline-none"
                 value={form.customerNotes}
                 onChange={(e) => update('customerNotes', e.target.value)}
               />
@@ -305,8 +314,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
           <div className="w-full md:w-72 space-y-3">
             <div className="flex justify-between text-sm text-gray-500">
               <span>Subtotal</span>
-              {/* @ts-ignore */}
-              <span className="font-semibold text-gray-900">${((form.items?.reduce((acc, item) => acc + (item.unitPriceCentsSnapshot * item.quantity), 0) || 0) / 100).toFixed(2)}</span>
+              <span className="font-semibold text-gray-900">${((form.invoiceItems?.reduce((acc: number, item: any) => acc + (item.unitPriceCentsSnapshot * item.quantity), 0) || 0) / 100).toFixed(2)}</span>
             </div>
             <div className="flex justify-between text-sm text-gray-500 border-b border-gray-100 pb-3">
               <span>Tax (0%)</span>
@@ -315,8 +323,7 @@ export const InvoiceForm: React.FC<InvoiceFormProps> = ({ onChange, invoice }) =
             <div className="flex justify-between text-lg font-black text-gray-900 pt-2">
               <span className="uppercase tracking-wider">Total</span>
               <span className="text-indigo-600">
-                {/* @ts-ignore */}
-                ${((form.items?.reduce((acc, item) => acc + (item.unitPriceCentsSnapshot * item.quantity), 0) || 0) / 100).toFixed(2)}
+                ${((form.invoiceItems?.reduce((acc: number, item: any) => acc + (item.unitPriceCentsSnapshot * item.quantity), 0) || 0) / 100).toFixed(2)}
               </span>
             </div>
           </div>

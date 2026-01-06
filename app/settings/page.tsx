@@ -14,7 +14,8 @@ import {
   Database,
   Hash,
   Layout,
-  Clock
+  Clock,
+  FileText
 } from 'lucide-react';
 
 export default function SettingsPage() {

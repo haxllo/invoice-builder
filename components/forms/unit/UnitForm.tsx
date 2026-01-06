@@ -2,17 +2,17 @@
 
 import React, { useEffect } from 'react';
 import { useForm } from '@/lib/hooks/useForm';
-import type { Unit, UnitAdd } from '@/lib/shared/types/unit';
+import type { Unit, UnitFromData } from '@/lib/shared/types/unit';
 import { Ruler, Info } from 'lucide-react';
 
 interface UnitFormProps {
   unit?: Unit;
-  onChange?: (data: { unit: UnitAdd; isValid: boolean }) => void;
+  onChange?: (data: { unit: UnitFromData; isValid: boolean }) => void;
 }
 
 export const UnitForm: React.FC<UnitFormProps> = ({ onChange, unit }) => {
-  const { form, update } = useForm<UnitAdd>({
-    id: unit?.id as any,
+  const { form, update } = useForm<UnitFromData>({
+    id: unit?.id,
     name: unit?.name ?? '',
     isArchived: unit?.isArchived ?? false
   });

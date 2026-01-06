@@ -2,18 +2,18 @@
 
 import React, { useEffect, useState } from 'react';
 import { useForm } from '@/lib/hooks/useForm';
-import type { Client, ClientAdd } from '@/lib/shared/types/client';
+import type { Client, ClientFromData } from '@/lib/shared/types/client';
 import { validators } from '@/lib/shared/utils/validatorFunctions';
 import { User, Mail, Phone, MapPin, Hash, Info } from 'lucide-react';
 
 interface ClientFormProps {
   client?: Client;
-  onChange?: (data: { client: ClientAdd; isValid: boolean }) => void;
+  onChange?: (data: { client: ClientFromData; isValid: boolean }) => void;
 }
 
 export const ClientForm: React.FC<ClientFormProps> = ({ onChange, client }) => {
-  const { form, update } = useForm<ClientAdd>({
-    id: client?.id as any,
+  const { form, update } = useForm<ClientFromData>({
+    id: client?.id,
     name: client?.name ?? '',
     shortName: client?.shortName ?? '',
     address: client?.address ?? '',

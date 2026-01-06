@@ -4,21 +4,21 @@ import React, { useEffect, useState } from 'react';
 import { useForm } from '@/lib/hooks/useForm';
 import { useUnitsRetrieve } from '@/lib/hooks/useUnitsRetrieve';
 import { useCategoriesRetrieve } from '@/lib/hooks/useCategoriesRetrieve';
-import type { Item, ItemAdd } from '@/lib/shared/types/item';
+import type { Item, ItemFromData } from '@/lib/shared/types/item';
 import { validators } from '@/lib/shared/utils/validatorFunctions';
 import { Package, DollarSign, Layers, Ruler, FileText, Info } from 'lucide-react';
 
 interface ItemFormProps {
   item?: Item;
-  onChange?: (data: { item: ItemAdd; isValid: boolean }) => void;
+  onChange?: (data: { item: ItemFromData; isValid: boolean }) => void;
 }
 
 export const ItemForm: React.FC<ItemFormProps> = ({ onChange, item }) => {
   const { units } = useUnitsRetrieve({ immediate: true });
   const { categories } = useCategoriesRetrieve({ immediate: true });
 
-  const { form, update } = useForm<ItemAdd>({
-    id: item?.id as any,
+  const { form, update } = useForm<ItemFromData>({
+    id: item?.id,
     name: item?.name ?? '',
     amount: item?.amount ?? '0',
     unitId: item?.unitId ?? 0,

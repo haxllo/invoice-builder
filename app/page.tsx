@@ -29,13 +29,13 @@ export default function OverviewPage() {
 
   // Calculate high-level stats
   const totalRevenue = invoices.reduce((acc, inv) => {
-    const invTotal = inv.invoice_items?.reduce((sum, item) => sum + (item.unitPriceCentsSnapshot * item.quantity), 0) || 0;
+    const invTotal = inv.invoiceItems?.reduce((sum, item) => sum + (item.unitPriceCentsSnapshot * item.quantity), 0) || 0;
     return acc + invTotal;
   }, 0) / 100;
 
   const unpaidInvoices = invoices.filter(inv => inv.status !== 'paid');
   const outstandingAmount = unpaidInvoices.reduce((acc, inv) => {
-    const invTotal = inv.invoice_items?.reduce((sum, item) => sum + (item.unitPriceCentsSnapshot * item.quantity), 0) || 0;
+    const invTotal = inv.invoiceItems?.reduce((sum, item) => sum + (item.unitPriceCentsSnapshot * item.quantity), 0) || 0;
     return acc + invTotal;
   }, 0) / 100;
 
@@ -120,7 +120,7 @@ export default function OverviewPage() {
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-600">{inv.clientNameSnapshot}</td>
                       <td className="px-6 py-4 font-medium text-gray-900">
-                        {inv.currencySymbolSnapshot}{((inv.invoice_items?.reduce((s, i) => s + (i.unitPriceCentsSnapshot * i.quantity), 0) || 0) / 100).toFixed(2)}
+                        {inv.currencySymbolSnapshot}{((inv.invoiceItems?.reduce((s, i) => s + (i.unitPriceCentsSnapshot * i.quantity), 0) || 0) / 100).toFixed(2)}
                       </td>
                       <td className="px-6 py-4">
                         <span className={`
@@ -159,7 +159,7 @@ export default function OverviewPage() {
                     <p className="text-xs text-gray-500">Due {new Date(inv.dueDate!).toLocaleDateString()}</p>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-bold text-gray-900">${((inv.invoice_items?.reduce((s, i) => s + (i.unitPriceCentsSnapshot * i.quantity), 0) || 0) / 100).toFixed(2)}</p>
+                    <p className="text-sm font-bold text-gray-900">${((inv.invoiceItems?.reduce((s, i) => s + (i.unitPriceCentsSnapshot * i.quantity), 0) || 0) / 100).toFixed(2)}</p>
                   </div>
                 </div>
               ))}

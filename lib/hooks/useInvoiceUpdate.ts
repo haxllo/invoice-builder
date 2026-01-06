@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { AttachmentAdd, InvoiceUpdate, InvoiceItemAdd, InvoicePaymentAdd } from '@/lib/shared/types/invoice';
+import type { InvoiceAttachment, InvoiceUpdate, InvoiceItem, InvoicePayment } from '@/lib/shared/types/invoice';
 import type { RequestHook } from '@/lib/shared/types/requestHook';
 import type { Response } from '@/lib/shared/types/response';
 import { useAsyncAction } from './useAsyncAction';
@@ -49,7 +49,7 @@ export const useInvoiceUpdate = ({ invoice, immediate = true, showLoader = true,
     if (!user) return { success: false, message: 'User not found' };
 
     try {
-      const { invoice_items, invoice_payments, attachments, customizationWatermarkFileData, customizationPaidWatermarkFileData, ...restOfInvoice } = invoice;
+      const { invoiceItems, invoicePayments, invoiceAttachments, customizationWatermarkFileData, customizationPaidWatermarkFileData, ...restOfInvoice } = invoice;
 
       // Fetch current invoice to compare attachments/watermarks
       const { data: currentInvoice, error: fetchError } = await supabase
@@ -87,8 +87,6 @@ export const useInvoiceUpdate = ({ invoice, immediate = true, showLoader = true,
       const { data: updatedInvoice, error: invoiceError } = await supabase
         .from('invoices')
         .update({
-            // Only update fields that changed (or all for simplicity)
-            // Ideally map all fields like in add
             invoice_number: restOfInvoice.invoiceNumber,
             issued_at: restOfInvoice.issuedAt,
             due_date: restOfInvoice.dueDate,
@@ -99,7 +97,6 @@ export const useInvoiceUpdate = ({ invoice, immediate = true, showLoader = true,
             status: restOfInvoice.status,
             customization_watermark_file_data: newWatermarkUrl,
             customization_paid_watermark_file_data: newPaidWatermarkUrl
-            // Add other fields as needed
         })
         .eq('id', invoice.id)
         .eq('user_id', user.id)
@@ -110,8 +107,8 @@ export const useInvoiceUpdate = ({ invoice, immediate = true, showLoader = true,
 
       // Simplistic update for related tables: delete all existing and insert new ones
       await supabase.from('invoice_items').delete().eq('parent_invoice_id', invoice.id);
-      if (invoice_items && invoice_items.length > 0) {
-        const itemsToInsert = invoice_items.map((item: InvoiceItemAdd) => ({
+      if (invoiceItems && invoiceItems.length > 0) {
+        const itemsToInsert = invoiceItems.map((item: InvoiceItem) => ({
           parent_invoice_id: invoice.id,
           item_id: item.itemId,
           item_name_snapshot: item.itemNameSnapshot,
@@ -125,9 +122,7 @@ export const useInvoiceUpdate = ({ invoice, immediate = true, showLoader = true,
         if (itemsError) throw new Error(`Failed to update invoice items: ${itemsError.message}`);
       }
 
-      // ... similar for payments if needed
-
-      return { success: true, data: updatedInvoice };
+      return { success: true, data: updatedInvoice as unknown as InvoiceUpdate };
     } catch (error) {
       return { success: false, message: (error as Error).message };
     }

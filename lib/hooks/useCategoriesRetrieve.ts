@@ -43,7 +43,7 @@ export const useCategoriesRetrieve = ({
     return { success: true, data: data as unknown as Category[] };
   }, [filter]);
 
-  const { data: categories, execute } = useAsyncAction<Response<Category[]>>(asyncFn, {
+  const { data: categories, execute, loading } = useAsyncAction<Response<Category[]>>(asyncFn, {
     showLoader,
     immediate,
     onDone
@@ -60,5 +60,5 @@ export const useCategoriesRetrieve = ({
     );
   }, [categories, dispatch]);
 
-  return { categories: categories?.data ?? [], execute };
+  return { categories: categories?.data ?? [], execute, loading };
 };

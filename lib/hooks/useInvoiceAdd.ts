@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
-import type { AttachmentAdd, InvoiceAdd, InvoiceItemAdd, InvoicePaymentAdd } from '@/lib/shared/types/invoice';
+import type { InvoiceAttachment, InvoiceAdd, InvoiceItem, InvoicePayment } from '@/lib/shared/types/invoice';
 import type { RequestHook } from '@/lib/shared/types/requestHook';
 import type { Response } from '@/lib/shared/types/response';
 import { useAsyncAction } from './useAsyncAction';
@@ -37,7 +37,7 @@ export const useInvoiceAdd = ({ invoice, immediate = true, showLoader = true, on
     if (!user) return { success: false, message: 'User not found' };
 
     try {
-      const { invoice_items, invoice_payments, attachments, customizationWatermarkFileData, customizationPaidWatermarkFileData, ...restOfInvoice } = invoice;
+      const { invoiceItems, invoicePayments, invoiceAttachments, customizationWatermarkFileData, customizationPaidWatermarkFileData, ...restOfInvoice } = invoice;
 
       let watermarkUrl: string | undefined;
       if (customizationWatermarkFileData && invoice.customizationWatermarkFileName) {
@@ -122,8 +122,8 @@ export const useInvoiceAdd = ({ invoice, immediate = true, showLoader = true, on
 
       if (invoiceError) throw new Error(`Failed to add invoice: ${invoiceError.message}`);
 
-      if (invoice_items && invoice_items.length > 0) {
-        const itemsToInsert = invoice_items.map((item: InvoiceItemAdd) => ({
+      if (invoiceItems && invoiceItems.length > 0) {
+        const itemsToInsert = invoiceItems.map((item: InvoiceItem) => ({
           parent_invoice_id: insertedInvoice.id,
           item_id: item.itemId,
           item_name_snapshot: item.itemNameSnapshot,
@@ -137,8 +137,8 @@ export const useInvoiceAdd = ({ invoice, immediate = true, showLoader = true, on
         if (itemsError) throw new Error(`Failed to add invoice items: ${itemsError.message}`);
       }
 
-      if (invoice_payments && invoice_payments.length > 0) {
-        const paymentsToInsert = invoice_payments.map((payment: InvoicePaymentAdd) => ({
+      if (invoicePayments && invoicePayments.length > 0) {
+        const paymentsToInsert = invoicePayments.map((payment: InvoicePayment) => ({
           parent_invoice_id: insertedInvoice.id,
           amount_cents: payment.amountCents,
           paid_at: payment.paidAt,

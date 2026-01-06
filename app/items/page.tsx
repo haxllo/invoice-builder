@@ -110,7 +110,7 @@ export default function ItemsPage() {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center text-sm font-black text-gray-900">
                       <DollarSign size={14} className="text-gray-400 mr-0.5" />
-                      {parseFloat(item.amount).toFixed(2)}
+                      {parseFloat(item.amount || '0').toFixed(2)}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-center">

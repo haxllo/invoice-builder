@@ -93,7 +93,7 @@ export const useInvoicesRetrieve = ({
         taxName:tax_name,
         taxRate:tax_rate,
         taxType:tax_type,
-        invoice_items (
+        invoiceItems:invoice_items (
           id,
           parentInvoiceId:parent_invoice_id,
           itemId:item_id,
@@ -106,7 +106,7 @@ export const useInvoicesRetrieve = ({
           createdAt:created_at,
           updatedAt:updated_at
         ),
-        invoice_payments (
+        invoicePayments:invoice_payments (
           id,
           parentInvoiceId:parent_invoice_id,
           amountCents:amount_cents,
@@ -116,7 +116,7 @@ export const useInvoicesRetrieve = ({
           createdAt:created_at,
           updatedAt:updated_at
         ),
-        attachments (
+        invoiceAttachments:attachments (
           id,
           parentInvoiceId:parent_invoice_id,
           fileName:file_name,
@@ -157,7 +157,7 @@ export const useInvoicesRetrieve = ({
     return { success: true, data: data as unknown as Invoice[] };
   }, [filter, type, dispatch]);
 
-  const { data: invoices, execute } = useAsyncAction<Response<Invoice[]>>(asyncFn, {
+  const { data: invoices, execute, loading } = useAsyncAction<Response<Invoice[]>>(asyncFn, {
     showLoader,
     immediate,
     onDone
@@ -185,5 +185,5 @@ export const useInvoicesRetrieve = ({
     );
   }, [invoices, dispatch]);
 
-  return { invoices: invoices?.data ?? [], execute };
+  return { invoices: invoices?.data ?? [], execute, loading };
 };

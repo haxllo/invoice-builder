@@ -53,7 +53,7 @@ export const useClientsRetrieve = ({
     return { success: true, data: data as unknown as Client[] };
   }, [filter]);
 
-  const { data: clients, execute } = useAsyncAction<Response<Client[]>>(asyncFn, { showLoader, immediate, onDone });
+  const { data: clients, execute, loading } = useAsyncAction<Response<Client[]>>(asyncFn, { showLoader, immediate, onDone });
 
-  return { clients: clients?.data ?? [], execute };
+  return { clients: clients?.data ?? [], execute, loading };
 };

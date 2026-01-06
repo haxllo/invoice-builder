@@ -147,7 +147,7 @@ export default function InvoicesPage() {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-black text-gray-900">
                         <span className="text-gray-400 mr-0.5">{invoice.currencySymbolSnapshot}</span>
-                        {((invoice.invoice_items?.reduce((acc, item) => acc + (item.unitPriceCentsSnapshot * item.quantity), 0) || 0) / 100).toFixed(2)}
+                        {((invoice.invoiceItems?.reduce((acc, item) => acc + (item.unitPriceCentsSnapshot * item.quantity), 0) || 0) / 100).toFixed(2)}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
