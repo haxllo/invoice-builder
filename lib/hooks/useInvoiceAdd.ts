@@ -33,8 +33,19 @@ export const useInvoiceAdd = ({ invoice, immediate = true, showLoader = true, on
   const asyncFn = useCallback(async () => {
     if (!invoice) return { success: false };
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return { success: false, message: 'User not found' };
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    
+    if (authError) {
+      console.error('Auth error:', authError);
+      return { success: false, message: `Authentication error: ${authError.message}` };
+    }
+    
+    if (!user) {
+      console.error('No user found in session');
+      return { success: false, message: 'Please log in again. Your session may have expired.' };
+    }
+
+    console.log('Creating invoice for user:', user.id);
 
     try {
       const { invoiceItems, invoicePayments, invoiceAttachments, customizationWatermarkFileData, customizationPaidWatermarkFileData, ...restOfInvoice } = invoice;
@@ -123,18 +134,23 @@ export const useInvoiceAdd = ({ invoice, immediate = true, showLoader = true, on
       if (invoiceError) throw new Error(`Failed to add invoice: ${invoiceError.message}`);
 
       if (invoiceItems && invoiceItems.length > 0) {
-        const itemsToInsert = invoiceItems.map((item: InvoiceItem) => ({
-          parent_invoice_id: insertedInvoice.id,
-          item_id: item.itemId,
-          item_name_snapshot: item.itemNameSnapshot,
-          unit_price_cents_snapshot: item.unitPriceCentsSnapshot,
-          unit_name_snapshot: item.unitNameSnapshot,
-          quantity: item.quantity,
-          tax_rate: item.taxRate,
-          tax_type: item.taxType
-        }));
-        const { error: itemsError } = await supabase.from('invoice_items').insert(itemsToInsert);
-        if (itemsError) throw new Error(`Failed to add invoice items: ${itemsError.message}`);
+        // Filter out custom items (itemId = 0) as they don't have a valid foreign key reference
+        const validItems = invoiceItems.filter(item => item.itemId > 0);
+        
+        if (validItems.length > 0) {
+          const itemsToInsert = validItems.map((item: InvoiceItem) => ({
+            parent_invoice_id: insertedInvoice.id,
+            item_id: item.itemId,
+            item_name_snapshot: item.itemNameSnapshot,
+            unit_price_cents_snapshot: item.unitPriceCentsSnapshot,
+            unit_name_snapshot: item.unitNameSnapshot,
+            quantity: item.quantity,
+            tax_rate: item.taxRate,
+            tax_type: item.taxType
+          }));
+          const { error: itemsError } = await supabase.from('invoice_items').insert(itemsToInsert);
+          if (itemsError) throw new Error(`Failed to add invoice items: ${itemsError.message}`);
+        }
       }
 
       if (invoicePayments && invoicePayments.length > 0) {

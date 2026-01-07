@@ -6,6 +6,7 @@ import StoreProvider from "@/lib/store/StoreProvider";
 import { AuthProvider } from "@/lib/context/AuthContext";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { usePathname } from "next/navigation";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -44,6 +45,7 @@ export default function RootLayout({
             )}
           </StoreProvider>
         </AuthProvider>
+        <Toaster />
       </body>
     </html>
   );

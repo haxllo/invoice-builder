@@ -23,7 +23,8 @@ export const useItemsRetrieve = ({ showLoader = true, filter, onDone }: RequestH
         description,
         isArchived:is_archived,
         createdAt:created_at,
-        updatedAt:updated_at
+        updatedAt:updated_at,
+        unitName:units(name)
       `)
       .eq('user_id', user.id);
 
@@ -42,7 +43,16 @@ export const useItemsRetrieve = ({ showLoader = true, filter, onDone }: RequestH
     if (error) {
       return { success: false, message: error.message };
     }
-    return { success: true, data: data as unknown as Item[] };
+    
+    // Transform unitName from nested object to string
+    const transformedData = data?.map((item: any) => ({
+      ...item,
+      unitName: typeof item.unitName === 'object' && item.unitName !== null 
+        ? (Array.isArray(item.unitName) ? item.unitName[0]?.name : item.unitName.name) || ''
+        : item.unitName || ''
+    }));
+    
+    return { success: true, data: transformedData as unknown as Item[] };
   }, [filter]);
 
   const { data: items, execute, loading } = useAsyncAction<Response<Item[]>>(asyncFn, { showLoader, onDone });

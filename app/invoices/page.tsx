@@ -10,10 +10,12 @@ import { PDFDownloadLink } from '@react-pdf/renderer';
 import { InvoicePDF } from '@/components/invoice/InvoicePDF';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function InvoicesPage() {
   const router = useRouter();
   const [isClient, setIsClient] = useState(false);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<number | null>(null);
 
   React.useEffect(() => {
     setIsClient(true);
@@ -24,16 +26,30 @@ export default function InvoicesPage() {
   });
 
   const { execute: deleteInvoice } = useInvoiceDelete({
-    id: 0,
+    id: invoiceToDelete || 0,
     immediate: false,
     onDone: (res) => {
-      if (res.success) refreshInvoices();
+      if (res.success) {
+        toast.success('Invoice deleted successfully');
+        refreshInvoices();
+        setInvoiceToDelete(null);
+      } else {
+        toast.error(res.message || 'Failed to delete invoice');
+        setInvoiceToDelete(null);
+      }
     }
   });
 
+  // Trigger delete when invoiceToDelete is set
+  React.useEffect(() => {
+    if (invoiceToDelete) {
+      deleteInvoice();
+    }
+  }, [invoiceToDelete, deleteInvoice]);
+
   const handleDelete = (id: number) => {
     if (confirm('Are you sure you want to delete this invoice? This action cannot be undone.')) {
-      deleteInvoice();
+      setInvoiceToDelete(id);
     }
   };
 
